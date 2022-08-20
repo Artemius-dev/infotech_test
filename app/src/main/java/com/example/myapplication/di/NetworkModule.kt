@@ -1,17 +1,16 @@
 package com.example.myapplication.di
 
-import com.example.myapplication.di.BaseApplication.Companion.BASE_URL
+import com.example.myapplication.BaseApplication.Companion.BASE_URL
+import com.example.myapplication.data.network.api.OpenWeatherApi
 import com.ihsanbal.logging.LoggingInterceptor
-import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import timber.log.Timber
 import com.ihsanbal.logging.Logger as LoggingLogger
 
@@ -23,12 +22,12 @@ class NetworkModule {
     @Singleton
     fun provideRetrofit(
         okHttpClient: OkHttpClient,
-        moshiConverterFactory: MoshiConverterFactory
+        gsonConverterFactory: GsonConverterFactory
     ): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(moshiConverterFactory)
+            .addConverterFactory(gsonConverterFactory)
             .build()
     }
 
@@ -52,18 +51,14 @@ class NetworkModule {
             .build()
     }
 
-    @Singleton
     @Provides
-    fun provideMoshi(): Moshi =
-        Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            .build()
+    @Singleton
+    fun provideGsonConverterFactory(): GsonConverterFactory = GsonConverterFactory.create()
 
     @Provides
     @Singleton
-    fun provideMoshiConverterFactory(
-        moshi: Moshi
-    ): MoshiConverterFactory = MoshiConverterFactory.create(moshi)
-        .withNullSerialization()
-        .asLenient()
+    fun provideOpenWeatherApi(retrofitClient: Retrofit): OpenWeatherApi {
+        return retrofitClient
+            .create(OpenWeatherApi::class.java)
+    }
 }

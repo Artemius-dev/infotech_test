@@ -1,31 +1,40 @@
 package com.example.myapplication.ui
 
-import android.animation.ObjectAnimator
-import android.content.Intent
+import android.content.Context
 import android.os.Bundle
-import android.provider.ContactsContract
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.animation.doOnEnd
-import androidx.core.animation.doOnStart
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.paging.LoadState
+import com.example.myapplication.R
+import com.example.myapplication.data.room.models.CitiesModel
 import com.example.myapplication.databinding.MainFragmentBinding
 import dagger.hilt.android.AndroidEntryPoint
-
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.onEach
+import java.io.IOException
 
 @AndroidEntryPoint
-class MainFragment: Fragment() {
+class MainFragment : Fragment(), NavigationCallback {
 
     private var _binding: MainFragmentBinding? = null
     private val binding get() = _binding!!
 
-    //Receiver
-    private val openContacts = registerForActivityResult(ActivityResultContracts.PickContact()) {
+    private val viewModel: MainVM by activityViewModels()
 
-    }
+    private lateinit var navController: NavController
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,34 +49,47 @@ class MainFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btClick.setOnClickListener {
-            showContacts()
+        val navHostFragment =
+            requireActivity().supportFragmentManager.findFragmentById(R.id.main_nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+
+        val items = viewModel.items
+        val citiesAdapter = CitiesAdapter(this)
+
+        binding.rvCities.adapter = citiesAdapter
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                citiesAdapter.loadStateFlow.collect {
+                    binding.lpiPrependProgress.isVisible = it.source.prepend is LoadState.Loading
+                    binding.lpiAppendProgress.isVisible = it.source.append is LoadState.Loading
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch() {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                items.collectLatest {
+                    citiesAdapter.submitData(it)
+                }
+            }
         }
     }
 
-    private fun startAnimation() {
-        val objectAnimator = ObjectAnimator.ofFloat(binding.btClick, "rotation", 0f, 360f)
-        objectAnimator.duration = 2000
-        objectAnimator.doOnStart {
-            binding.btClick.isClickable = false
-        }
-        objectAnimator.doOnEnd {
-            binding.btClick.isClickable = true
-        }
-        objectAnimator.start()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
-    private fun showToastMessage() {
-        Toast.makeText(context, "Action is Toast!", Toast.LENGTH_LONG).show()
+    override fun navigateToCitiesDetails(citiesModel: CitiesModel) {
+        navController.navigate(
+            MainFragmentDirections.actionMainFragmentToCitiesDetailFragment(
+                citiesModel.id,
+                citiesModel.name,
+                citiesModel.coord.lat.toString(),
+                citiesModel.coord.lon.toString()
+            )
+        )
     }
 
-    private fun showContacts() {
-        val intent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
-
-        openContacts.launch(null)
-    }
-
-    private fun showNotification() {
-
-    }
 }

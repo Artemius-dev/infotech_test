@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="app_account_type" translatable="false">com.example.myapplication</string>
     <string name="click_on_me">Click on me</string>
+    <string name="test_string">Ḩeşār-e Sefīd</string>
+    <string name="air_temperature">Air Temperature: %1$s F</string>
+    <string name="description">Description: %1$s</string>
+    <string name="min_air_temperature">Min Air Temperature: %1$s F</string>
+    <string name="max_air_temperature">Max Air Temperature: %1$s F</string>
+    <string name="humidity">Humidity: %1$s</string>
+    <string name="wind_speed">Wind speed: %1$s</string>
+    <string name="search">Search</string>
 </resources>
