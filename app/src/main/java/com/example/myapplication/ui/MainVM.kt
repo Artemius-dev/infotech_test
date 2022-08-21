@@ -3,25 +3,24 @@ package com.example.myapplication.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
+import com.example.myapplication.data.paging.CitieRequestState
 import com.example.myapplication.data.room.models.CitiesModel
-import com.example.myapplication.data.room.CitiesRoomDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-private const val ITEMS_PER_PAGE = 20
+const val ITEMS_PER_PAGE = 5
 
 @HiltViewModel
 class MainVM @Inject constructor(private val repository: CitiesRepository) : ViewModel() {
+    init {
+        showAllCities()
+    }
 
-    val items: Flow<PagingData<CitiesModel>> = Pager(
-        config = PagingConfig(pageSize = ITEMS_PER_PAGE, enablePlaceholders = false),
-        pagingSourceFactory = { repository.citiesPagingSource() }
-    ).flow.cachedIn(viewModelScope)
+    lateinit var items: Flow<PagingData<CitiesModel>>
 
     fun readJson(jsonFileString: String?) {
         viewModelScope.launch {
@@ -32,5 +31,26 @@ class MainVM @Inject constructor(private val repository: CitiesRepository) : Vie
             // TODO: Check whether the data is already present
             citiesList.let { repository.insertAll(it) }
         }
+    }
+
+    fun showAllCities() {
+        items =  Pager(
+            config = PagingConfig(pageSize = ITEMS_PER_PAGE, enablePlaceholders = false),
+            pagingSourceFactory = { repository.citiesPagingSource() }
+        ).flow.cachedIn(viewModelScope)
+    }
+
+    fun searchCities(searchName: String) {
+        items = Pager(
+            config = PagingConfig(pageSize = ITEMS_PER_PAGE, enablePlaceholders = false),
+            pagingSourceFactory = { repository.citiesPagingSource(CitieRequestState.SEARCH, searchName) }
+        ).flow.cachedIn(viewModelScope)
+    }
+
+    fun filterCities(filterCountry: String) {
+        items = Pager(
+            config = PagingConfig(pageSize = ITEMS_PER_PAGE, enablePlaceholders = false),
+            pagingSourceFactory = { repository.citiesPagingSource(CitieRequestState.FILTER, filterCountry) }
+        ).flow.cachedIn(viewModelScope)
     }
 }

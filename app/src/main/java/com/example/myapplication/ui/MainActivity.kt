@@ -5,9 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.fragment.app.add
-import androidx.fragment.app.commit
 import com.example.myapplication.R
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.IOException

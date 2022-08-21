@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.myapplication.data.room.models.CitiesModel
+import com.example.myapplication.ui.ITEMS_PER_PAGE
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -24,9 +25,15 @@ interface CitiesDao {
     @Query("SELECT * FROM cities_table WHERE citie_id = :citieId")
     suspend fun getCitie(citieId: Int): CitiesModel
 
+    @Query("SELECT * FROM cities_table WHERE name LIKE :citieName LIMIT :limitRangeStart, :limitPerPage")
+    suspend fun getCitieWithName(citieName: String, limitRangeStart: Int, limitPerPage: Int): List<CitiesModel>
+
+    @Query("SELECT * FROM cities_table LIMIT :limitRangeStart, :limitPerPage")
+    suspend fun getCitiesInRange(limitRangeStart: Int, limitPerPage: Int): List<CitiesModel>
+
     @Query("SELECT * FROM cities_table WHERE id = :id")
     suspend fun isDataExist(id: Int): CitiesModel
 
-    @Query("SELECT * FROM cities_table WHERE name LIKE :name")
-    fun searchDatabase(name: String): Flow<List<CitiesModel>>
+    @Query("SELECT * FROM cities_table WHERE country LIKE :countryName LIMIT :limitRangeStart, :limitPerPage")
+    suspend fun filterCitiesByCountry(countryName: String, limitRangeStart: Int, limitPerPage: Int): List<CitiesModel>
 }
