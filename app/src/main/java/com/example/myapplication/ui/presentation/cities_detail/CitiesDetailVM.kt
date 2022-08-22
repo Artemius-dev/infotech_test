@@ -1,10 +1,11 @@
-package com.example.myapplication.ui
+package com.example.myapplication.ui.presentation.cities_detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.BuildConfig
 import com.example.myapplication.data.network.api.OpenWeatherApi
 import com.example.myapplication.data.network.models.OpenWeatherResponse
+import com.example.myapplication.data.repositories.CitiesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -14,7 +15,6 @@ import retrofit2.Callback
 import retrofit2.Response
 import timber.log.Timber
 import javax.inject.Inject
-
 
 @HiltViewModel
 class CitiesDetailVM @Inject constructor(

@@ -1,25 +1,28 @@
-package com.example.myapplication.ui
+package com.example.myapplication.ui.recyclers.countries
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.example.myapplication.data.room.models.CitiesModel
-import com.example.myapplication.databinding.CardCitiesBinding
+import com.example.myapplication.databinding.FilterCardBinding
+import com.example.myapplication.ui.callbacks.NavigationCallback
 
-class CitiesAdapter(private val callback: NavigationCallback) : PagingDataAdapter<CitiesModel, CitiesViewHolder>(CITIES_DIFF_CALLBACK) {
+class CountryAdapter(private val callback: NavigationCallback) : PagingDataAdapter<CitiesModel, CountryViewHolder>(
+    CITIES_DIFF_CALLBACK
+) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CitiesViewHolder =
-        CitiesViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryViewHolder =
+        CountryViewHolder(
             callback,
-            CardCitiesBinding.inflate(
+            FilterCardBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false,
             )
         )
 
-    override fun onBindViewHolder(holder: CitiesViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: CountryViewHolder, position: Int) {
         val tile = getItem(position)
         if (tile != null) {
             holder.bind(tile)

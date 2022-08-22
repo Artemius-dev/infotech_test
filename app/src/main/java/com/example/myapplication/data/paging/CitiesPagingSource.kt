@@ -4,7 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.example.myapplication.STARTING_KEY
 import com.example.myapplication.data.room.models.CitiesModel
-import com.example.myapplication.ui.CitiesRepository
+import com.example.myapplication.data.repositories.CitiesRepository
 import java.lang.Integer.max
 
 class CitiesPagingSource(
@@ -21,7 +21,7 @@ class CitiesPagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CitiesModel> {
         // Start paging with the STARTING_KEY if this is the first load
         val start = params.key ?: STARTING_KEY
-        val pageSize = params.loadSize
+        val pageSize = params.loadSize * 2
         // Load as many items as hinted by params.loadSize
         val range = start.until(start + pageSize)
 
@@ -42,13 +42,38 @@ class CitiesPagingSource(
             }
             CitieRequestState.FILTER -> {
                 val getCities =
-                    repository.filterCitiesByCountry(citieNameCountry, range.first, pageSize)
+                    repository.getCountryInRange(range.first, pageSize)
 
                 val nextKey = if (getCities.size < pageSize) null else start + pageSize
 
                 LoadResult.Page(
                     data = getCities,
-                    // Make sure we don't try to load items behind the STARTING_KEY
+                    nextKey = nextKey,
+                    prevKey = null,
+
+                    )
+            }
+            CitieRequestState.COUNTRY_FILTER -> {
+                val getCities =
+                    repository.getCountryWithName(citieNameCountry, range.first, pageSize)
+
+                val nextKey = if (getCities.size < pageSize) null else start + pageSize
+
+                LoadResult.Page(
+                    data = getCities,
+                    nextKey = nextKey,
+                    prevKey = null,
+
+                    )
+            }
+            CitieRequestState.CITIES_BY_COUNTRY -> {
+                val getCities =
+                    repository.getCitiesByCountry(citieNameCountry, range.first, pageSize)
+
+                val nextKey = if (getCities.size < pageSize) null else start + pageSize
+
+                LoadResult.Page(
+                    data = getCities,
                     nextKey = nextKey,
                     prevKey = null,
 
@@ -61,7 +86,6 @@ class CitiesPagingSource(
 
                 LoadResult.Page(
                     data = getCities,
-                    // Make sure we don't try to load items behind the STARTING_KEY
                     nextKey = nextKey,
                     prevKey = null
                 )

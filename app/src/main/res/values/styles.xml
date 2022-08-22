@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="country_name">
+        <item name="android:textSize">@dimen/text_size_20</item>
+    </style>
+
+    <style name="default_button">
+        <item name="android:padding">@dimen/padding_48</item>
+    </style>
+
+</resources>

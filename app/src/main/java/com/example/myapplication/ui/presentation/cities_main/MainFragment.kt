@@ -1,17 +1,15 @@
-package com.example.myapplication.ui
+package com.example.myapplication.ui.presentation.cities_main
 
 import android.os.Bundle
 import android.view.*
+import android.widget.ImageView
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.whenResumed
+import androidx.lifecycle.*
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.paging.LoadState
@@ -19,13 +17,21 @@ import androidx.paging.PagingData
 import com.example.myapplication.R
 import com.example.myapplication.data.room.models.CitiesModel
 import com.example.myapplication.databinding.MainFragmentBinding
+import com.example.myapplication.ui.callbacks.DialogListener
+import com.example.myapplication.ui.callbacks.NavigationCallback
+import com.example.myapplication.ui.hideKeyboard
+import com.example.myapplication.ui.presentation.filter.FilterDialog
+import com.example.myapplication.ui.recyclers.cites.CitiesAdapter
+import com.example.myapplication.ui.setImage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @AndroidEntryPoint
-class MainFragment : Fragment(), NavigationCallback {
+class MainFragment : Fragment(), NavigationCallback, DialogListener {
 
     private var _binding: MainFragmentBinding? = null
     private val binding get() = _binding!!
@@ -38,6 +44,12 @@ class MainFragment : Fragment(), NavigationCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel.getRetryState().onEach {
+            whenResumed {
+                submitData(viewModel.items)
+            }
+        }.launchIn(lifecycleScope)
     }
 
     override fun onCreateView(
@@ -62,7 +74,7 @@ class MainFragment : Fragment(), NavigationCallback {
 
         viewLifecycleOwner.lifecycleScope.launch {
             whenResumed {
-                viewModel.items?.collectLatest { items ->
+                viewModel.items.collectLatest { items ->
                     citiesAdapter.submitData(items)
                 }
             }
@@ -81,18 +93,18 @@ class MainFragment : Fragment(), NavigationCallback {
 
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                // Add menu items here
                 menuInflater.inflate(R.menu.search_menu, menu)
                 val searchView = menu.findItem(R.id.menu_search).actionView as SearchView
                 searchView.isSubmitButtonEnabled = true
                 searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String?): Boolean {
-                        if(query != null) {
+                        if (query != null) {
                             searchDatabase(query)
                         } else {
                             viewModel.showAllCities()
                             submitData(items)
                         }
+                        hideKeyboard()
                         return true
                     }
 
@@ -104,19 +116,20 @@ class MainFragment : Fragment(), NavigationCallback {
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 // Handle the menu selection
-                return true
+                return when (menuItem.itemId) {
+                    R.id.menu_filter -> {
+                        FilterDialog.newInstance(viewModel, this@MainFragment)
+                            .show(childFragmentManager, "Filter Dialog")
+                        true
+                    }
+                    else -> false
+                }
             }
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    fun submitData(items: Flow<PagingData<CitiesModel>>) {
-        viewLifecycleOwner.lifecycleScope.launch() {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                items.collectLatest {
-                    citiesAdapter.submitData(it)
-                }
-            }
-        }
+    override fun onResume() {
+        super.onResume()
     }
 
     override fun onDestroyView() {
@@ -133,6 +146,24 @@ class MainFragment : Fragment(), NavigationCallback {
                 citiesModel.coord.lon.toString()
             )
         )
+    }
+
+    fun submitData(items: Flow<PagingData<CitiesModel>>) {
+        viewLifecycleOwner.lifecycleScope.launch() {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                items.collectLatest {
+                    citiesAdapter.submitData(it)
+                }
+            }
+        }
+    }
+
+    override fun onFinishDialog() {
+        submitData(viewModel.items)
+    }
+
+    override fun setCitieImage(citieId: Int, imageView: ImageView) {
+        imageView.setImage(getString(viewModel.setCitieImage(citieId)))
     }
 
     private fun searchDatabase(query: String) {

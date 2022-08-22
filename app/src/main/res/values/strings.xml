@@ -10,4 +10,8 @@
     <string name="humidity">Humidity: %1$s</string>
     <string name="wind_speed">Wind speed: %1$s</string>
     <string name="search">Search</string>
+    <string name="even_image_st">https://infotech.gov.ua/storage/img/Temp3.png</string>
+    <string name="odd_image_st">https://infotech.gov.ua/storage/img/Temp1.png</string>
+    <string name="test_country">US</string>
+    <string name="filter_hint">Type country to search</string>
 </resources>

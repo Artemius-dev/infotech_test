@@ -5,5 +5,12 @@
         android:title="@string/search"
         android:icon="@drawable/ic_search_white"
         app:showAsAction="ifRoom"
+        android:orderInCategory="1"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
+
+    <item android:id="@+id/menu_filter"
+        android:title="@string/search"
+        android:icon="@drawable/ic_baseline_filter_white"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="2" />
 </menu>

@@ -2,5 +2,8 @@
 <resources>
     <dimen name="default_padding">10dp</dimen>
     <dimen name="margin_10">10dp</dimen>
+    <dimen name="margin_20">20dp</dimen>
     <dimen name="margin_30">30dp</dimen>
+    <dimen name="text_size_20">20dp</dimen>
+    <dimen name="padding_48">48dp</dimen>
 </resources>
