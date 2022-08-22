@@ -24,8 +24,8 @@ interface CitiesDao {
     @Query("SELECT * FROM cities_table")
     suspend fun getAllCities(): List<CitiesModel>
 
-    @Query("SELECT * FROM cities_table WHERE citie_id = :citieId")
-    suspend fun getCitie(citieId: Int): CitiesModel
+    @Query("SELECT * FROM cities_table WHERE id = :id")
+    suspend fun getCitie(id: Int): CitiesModel
 
     @Query("SELECT * FROM cities_table WHERE name LIKE :citieName LIMIT :limitRangeStart, :limitPerPage")
     suspend fun getCitieWithName(citieName: String, limitRangeStart: Int, limitPerPage: Int): List<CitiesModel>

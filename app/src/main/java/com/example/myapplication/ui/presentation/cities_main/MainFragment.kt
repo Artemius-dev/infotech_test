@@ -140,7 +140,7 @@ class MainFragment : Fragment(), NavigationCallback, DialogListener {
     override fun navigateToCitiesDetails(citiesModel: CitiesModel) {
         navController.navigate(
             MainFragmentDirections.actionMainFragmentToCitiesDetailFragment(
-                citiesModel.citie_id,
+                citiesModel.id,
                 citiesModel.name,
                 citiesModel.coord.lat.toString(),
                 citiesModel.coord.lon.toString()

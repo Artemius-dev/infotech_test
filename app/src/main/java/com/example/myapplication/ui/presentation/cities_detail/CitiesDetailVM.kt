@@ -28,8 +28,7 @@ class CitiesDetailVM @Inject constructor(
         viewModelScope.launch {
             val currentCitie = repository.getCitie(id)
             val currentWeather = openWeatherApi.getCurrentWeatherData(
-                currentCitie.coord.lon.toString(),
-                currentCitie.coord.lat.toString(),
+                "${currentCitie.name},${currentCitie.country}",
                 BuildConfig.API_KEY
             )
             currentWeather.enqueue(object : Callback<OpenWeatherResponse?> {
